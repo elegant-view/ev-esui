@@ -11,6 +11,9 @@ vtpl.registerParser(ESUIParser);
 vtpl.render();
 vtpl.setData({
     buttonContent: '按钮',
+    onButtonClick() {
+        alert('click');
+    },
     selectDatasource: [
         {
             name: '张三',

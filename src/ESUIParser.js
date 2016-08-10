@@ -8,7 +8,7 @@ import Node from 'vtpl/nodes/Node';
 import esui from 'esui';
 import ViewContext from 'esui/ViewContext';
 import * as util from 'vtpl/utils';
-import {extend} from 'underscore';
+import {extend, each, isFunction} from 'underscore';
 
 export default class ESUIParser extends HTMLExprParser {
 
@@ -34,21 +34,52 @@ export default class ESUIParser extends HTMLExprParser {
 
     initRender(done) {
         super.initRender(() => {
-            const controlOptions = extend(this.initProperties, {main: this.startNode.getDOMNode()});
+            const controlOptions = extend(
+                {},
+                this.initProperties,
+                {
+                    main: this.startNode.getDOMNode(),
+                    viewContext: this.tree.getTreeVar('esuiViewContext')
+                }
+            );
             this.control = esui.create(this.controlType, controlOptions);
             this.control.render();
+
+            each(this.initProperties, (propertyValue, propertyName) => {
+                if (/^esui-on-/.test(propertyName)) {
+                    this.bindEvent(propertyName.replace(/^esui-on-/, ''), propertyValue);
+                }
+            });
+
             this.initProperties = null;
             done && done();
         });
     }
 
+    bindEvent(eventName, handler) {
+        if (!isFunction(handler)) {
+            return;
+        }
+        this.control.on(eventName, handler);
+    }
+
     setAttr(attrName, attrValue) {
-        if (!this.control) {
+        if (attrName === 'ref') {
+            this.ref = attrValue;
+            const children = this.tree.getTreeVar('children');
+            children[attrValue] = this.control;
+        }
+        else if (!this.control) {
             this.initProperties = this.initProperties || {};
             this.initProperties[attrName] = attrValue;
         }
         else {
-            this.control.set(attrName, attrValue);
+            if (/^esui-on-/.test(attrName)) {
+                this.bindEvent(attrName.replace(/^esui-on-/, ''), attrValue);
+            }
+            else {
+                this.control.set(attrName, attrValue);
+            }
         }
     }
 
