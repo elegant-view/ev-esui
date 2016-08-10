@@ -10,14 +10,33 @@ import ViewContext from 'esui/ViewContext';
 import * as util from 'vtpl/utils';
 import {extend, each, isFunction} from 'underscore';
 
+/**
+ * ESUIParser
+ *
+ * @class
+ * @extends {HTMLExprParser}
+ */
 export default class ESUIParser extends HTMLExprParser {
 
+    /**
+     * constructor
+     *
+     * @public
+     * @override
+     * @param  {Object} options 参数
+     */
     constructor(options) {
         super(options);
 
         this.createViewContext();
+        this.controlType = util.line2camel(this.startNode.getTagName().replace(/^esui/, ''));
     }
 
+    /**
+     * 创建ESUI的viewContext
+     *
+     * @private
+     */
     createViewContext() {
         let viewContext = this.tree.getTreeVar('esuiViewContext');
         if (!viewContext) {
@@ -26,12 +45,13 @@ export default class ESUIParser extends HTMLExprParser {
         }
     }
 
-    collectExprs() {
-        super.collectExprs();
-
-        this.controlType = util.line2camel(this.startNode.getTagName().replace(/^esui/, ''));
-    }
-
+    /**
+     * initRender
+     *
+     * @override
+     * @public
+     * @param  {Function} done 执行完成的回调函数
+     */
     initRender(done) {
         super.initRender(() => {
             const controlOptions = extend(
@@ -56,6 +76,13 @@ export default class ESUIParser extends HTMLExprParser {
         });
     }
 
+    /**
+     * 绑定ESUI控件的回调函数
+     *
+     * @private
+     * @param  {string} eventName 事件名
+     * @param  {Function} handler   事件回调函数
+     */
     bindEvent(eventName, handler) {
         if (!isFunction(handler)) {
             return;
@@ -63,6 +90,14 @@ export default class ESUIParser extends HTMLExprParser {
         this.control.on(eventName, handler);
     }
 
+    /**
+     * setAttr
+     *
+     * @protected
+     * @override
+     * @param {string} attrName  属性名
+     * @param {*} attrValue 属性值
+     */
     setAttr(attrName, attrValue) {
         if (attrName === 'ref') {
             this.ref = attrValue;
@@ -83,6 +118,12 @@ export default class ESUIParser extends HTMLExprParser {
         }
     }
 
+    /**
+     * release
+     *
+     * @override
+     * @protected
+     */
     release() {
         if (this.control) {
             this.control.destroy();
