@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf8">
+    <link rel="stylesheet" href="./main.css" media="screen" title="no title" charset="utf-8">
+</head>
+
+<body>
+
+    <esui-button content="{buttonContent}"></esui-button>
+    <esui-select datasource="{selectDatasource}"></esui-select>
+
+    <script src="../node_modules/requirejs/require.js"></script>
+    <script>
+        require.config({
+            "baseUrl": "./",
+            "paths": {},
+            "packages": [
+                {
+                    "name": "vtpl",
+                    "location": "../node_modules/vtpl/src",
+                    "main": "main"
+                },
+                {
+                    "name": "underscore",
+                    "location": "../dep/underscore/1.5.2/src",
+                    "main": "underscore"
+                },
+                {
+                    "name": 'protectobject',
+                    "location": '../node_modules/ProtectObject/src'
+                },
+                {
+                    "name": 'event',
+                    "location": '../node_modules/event/src'
+                },
+                {
+                    "name": "state",
+                    "location": "../node_modules/state/src"
+                },
+                {
+                    "name": "ev-esui",
+                    "location": "../src"
+                },
+                {
+                    "name": "esui",
+                    "location": "../dep/esui/3.1.1/src",
+                    "main": "main"
+                },
+                {
+                    "name": "moment",
+                    "location": "../dep/moment/2.7.0/src",
+                    "main": "moment"
+                },
+                {
+                    "name": "mini-event",
+                    "location": "../dep/mini-event/1.0.2/src",
+                    "main": "main"
+                }
+            ]
+        });
+
+        require(['./main']);
+    </script>
+</body>
+
+</html>
