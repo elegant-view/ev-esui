@@ -10,6 +10,9 @@ import ViewContext from 'esui/ViewContext';
 import * as util from 'vtpl/utils';
 import {extend, each, isFunction} from 'underscore';
 
+const EVENT_PREFIX_REGEXP = /^esui-on-/;
+const CONTROL_PREFIX_REGEXP = /^esui/;
+
 /**
  * ESUIParser
  *
@@ -17,6 +20,9 @@ import {extend, each, isFunction} from 'underscore';
  * @extends {HTMLExprParser}
  */
 export default class ESUIParser extends HTMLExprParser {
+
+    static priority = 4;
+    controlType;
 
     /**
      * constructor
@@ -29,7 +35,10 @@ export default class ESUIParser extends HTMLExprParser {
         super(options);
 
         this.createViewContext();
-        this.controlType = util.line2camel(this.startNode.getTagName().replace(/^esui/, ''));
+
+        this.controlType = CONTROL_PREFIX_REGEXP.test(this.startNode.getTagName())
+            ? util.line2camel(this.startNode.getTagName().replace(CONTROL_PREFIX_REGEXP, ''))
+            : this.startNode.getAttribute('esui-type');
     }
 
     /**
@@ -66,8 +75,8 @@ export default class ESUIParser extends HTMLExprParser {
             this.control.render();
 
             each(this.initProperties, (propertyValue, propertyName) => {
-                if (/^esui-on-/.test(propertyName)) {
-                    this.bindEvent(propertyName.replace(/^esui-on-/, ''), propertyValue);
+                if (EVENT_PREFIX_REGEXP.test(propertyName)) {
+                    this.bindEvent(propertyName.replace(EVENT_PREFIX_REGEXP, ''), propertyValue);
                 }
             });
 
@@ -99,7 +108,10 @@ export default class ESUIParser extends HTMLExprParser {
      * @param {*} attrValue 属性值
      */
     setAttr(attrName, attrValue) {
-        if (attrName === 'ref') {
+        if (attrName === 'esui-type') {
+            return;
+        }
+        else if (attrName === 'ref') {
             this.ref = attrValue;
             const children = this.tree.getTreeVar('children');
             children[attrValue] = this.control;
@@ -109,8 +121,8 @@ export default class ESUIParser extends HTMLExprParser {
             this.initProperties[attrName] = attrValue;
         }
         else {
-            if (/^esui-on-/.test(attrName)) {
-                this.bindEvent(attrName.replace(/^esui-on-/, ''), attrValue);
+            if (EVENT_PREFIX_REGEXP.test(attrName)) {
+                this.bindEvent(attrName.replace(EVENT_PREFIX_REGEXP, ''), attrValue);
             }
             else {
                 this.control.set(attrName, attrValue);
@@ -141,6 +153,10 @@ export default class ESUIParser extends HTMLExprParser {
      * @return {boolean}
      */
     static isProperNode(node) {
-        return node.getNodeType() === Node.ELEMENT_NODE && /^esui-/.test(node.getTagName());
+        return node.getNodeType() === Node.ELEMENT_NODE
+            && (
+                CONTROL_PREFIX_REGEXP.test(node.getTagName())
+                || node.getAttribute('esui-type')
+            );
     }
 }

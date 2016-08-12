@@ -22,6 +22,30 @@ vtpl.setData({
         {
             name: '李四',
             value: 2
+        },
+        {
+            name: '张三',
+            value: 1
+        },
+        {
+            name: '李四',
+            value: 2
+        },
+        {
+            name: '张三',
+            value: 1
+        },
+        {
+            name: '李四',
+            value: 2
+        },
+        {
+            name: '张三',
+            value: 1
+        },
+        {
+            name: '李四',
+            value: 2
         }
     ]
 });
