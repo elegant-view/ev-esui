@@ -9,6 +9,7 @@ import esui from 'esui';
 import ViewContext from 'esui/ViewContext';
 import * as util from 'vtpl/utils';
 import {extend, each, isFunction} from 'underscore';
+import DoneChecker from 'vtpl/DoneChecker';
 
 const EVENT_PREFIX_REGEXP = /^esui-on-/;
 const CONTROL_PREFIX_REGEXP = /^esui/;
@@ -62,27 +63,40 @@ export default class ESUIParser extends HTMLExprParser {
      * @param  {Function} done 执行完成的回调函数
      */
     initRender(done) {
-        super.initRender(() => {
-            const controlOptions = extend(
-                {},
-                this.initProperties,
-                {
-                    main: this.startNode.getDOMNode(),
-                    viewContext: this.tree.getTreeVar('esuiViewContext')
-                }
+        const doneChecker = new DoneChecker(done);
+
+        doneChecker.add(innerDone => super.initRender(innerDone));
+        doneChecker.add(innerDone => {
+            const domUpdater = this.getDOMUpdater();
+            const taskId = domUpdater.generateNodeAttrUpdateId(this.startNode, ' esui-render');
+
+            domUpdater.addTaskFn(
+                taskId,
+                () => {
+                    const controlOptions = extend(
+                        {},
+                        this.initProperties,
+                        {
+                            main: this.startNode.getDOMNode(),
+                            viewContext: this.tree.getTreeVar('esuiViewContext')
+                        }
+                    );
+                    this.control = esui.create(this.controlType, controlOptions);
+                    this.control.render();
+
+                    each(this.initProperties, (propertyValue, propertyName) => {
+                        if (EVENT_PREFIX_REGEXP.test(propertyName)) {
+                            this.bindEvent(propertyName.replace(EVENT_PREFIX_REGEXP, ''), propertyValue);
+                        }
+                    });
+
+                    this.initProperties = null;
+                },
+                innerDone
             );
-            this.control = esui.create(this.controlType, controlOptions);
-            this.control.render();
-
-            each(this.initProperties, (propertyValue, propertyName) => {
-                if (EVENT_PREFIX_REGEXP.test(propertyName)) {
-                    this.bindEvent(propertyName.replace(EVENT_PREFIX_REGEXP, ''), propertyValue);
-                }
-            });
-
-            this.initProperties = null;
-            done && done();
         });
+
+        doneChecker.complete();
     }
 
     /**
