@@ -3,6 +3,7 @@
  * @author yibuyisheng(yibuyisheng@163.com)
  */
 
+// control
 import 'esui/Button';
 import 'esui/BoxGroup';
 import 'esui/Calendar';
@@ -34,3 +35,13 @@ import 'esui/Tip';
 import 'esui/Toast';
 import 'esui/Tree';
 import 'esui/Wizard';
+
+// validator
+import 'esui/validator/MaxByteLengthRule';
+import 'esui/validator/MaxLengthRule';
+import 'esui/validator/MaxRule';
+import 'esui/validator/MinByteLengthRule';
+import 'esui/validator/MinLengthRule';
+import 'esui/validator/MinRule';
+import 'esui/validator/PatternRule';
+import 'esui/validator/RequiredRule';
