@@ -81,7 +81,12 @@ export default class ESUIParser extends HTMLExprParser {
                             viewContext: this.tree.getTreeVar('esuiViewContext')
                         }
                     );
+
+                    const ref = this.startNode.getAttribute('ref');
                     this.control = esui.create(this.controlType, controlOptions);
+                    if (ref) {
+                        this.setAttr('ref', ref);
+                    }
                     this.control.render();
 
                     each(this.initProperties, (propertyValue, propertyName) => {
