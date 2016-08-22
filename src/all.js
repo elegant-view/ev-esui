@@ -45,3 +45,12 @@ import 'esui/validator/MinLengthRule';
 import 'esui/validator/MinRule';
 import 'esui/validator/PatternRule';
 import 'esui/validator/RequiredRule';
+
+// extension
+import 'esui/extension/AutoSort';
+import 'esui/extension/AutoTipLayer';
+import 'esui/extension/CustomData';
+import 'esui/extension/Command';
+import 'esui/extension/TableEdit';
+import 'esui/extension/TableRowClick';
+import 'esui/extension/TableSubrow';
