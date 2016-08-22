@@ -137,7 +137,14 @@ export default class ESUIParser extends HTMLExprParser {
         }
         else if (!this.control) {
             this.initProperties = this.initProperties || {};
-            this.initProperties[attrName] = attrValue;
+            if (attrName.indexOf('extension-') === 0) {
+                this.initProperties.extensions = this.initProperties.extensions || [];
+                const extension = esui.createExtension(attrValue, {});
+                extension && this.initProperties.extensions.push(extension);
+            }
+            else {
+                this.initProperties[attrName] = attrValue;
+            }
         }
         else {
             if (EVENT_PREFIX_REGEXP.test(attrName)) {
