@@ -1,3 +1,8 @@
+/**
+ * @file ESUI控件封装
+ * @author yibuyisheng(yibuyisheng@163.com)
+ */
+
 import Component, {type} from 'vcomponent/Component';
 import {PropTypes} from 'vcomponent/type';
 import {propsType} from 'vcomponent/decorators';
@@ -10,26 +15,54 @@ import Tree from 'vtpl/trees/Tree';
 })
 @type('Esui')
 export default class Esui extends Component {
+
+    /**
+     * 记录一下事件回调，方便销毁
+     *
+     * @private
+     * @type {Object}
+     */
     eventCache = {};
+
+    /**
+     * 当前控件是否隐藏
+     *
+     * @type {boolean}
+     */
     isHide = false;
 
+    /**
+     * @override
+     */
     getTemplate() {
         return '<div ref="main" class="{props.class}"></div>';
     }
 
+    /**
+     * 获取控件类型
+     *
+     * @protected
+     * @return {string} 控件类型
+     */
     getControlType() {
         return this.props.evType;
     }
 
-    init() {
-
-    }
-
+    /**
+     * 在隐藏之前销毁控件，防止控件上的方法调用带来不必要的麻烦
+     *
+     * @override
+     */
     beforeHide() {
         this.isHide = true;
         this.destroyControl();
     }
 
+    /**
+     * 显示出来的时候，把控件重新创建出来
+     *
+     * @override
+     */
     afterShow() {
         this.isHide = false;
         if (!this.control) {
@@ -37,12 +70,22 @@ export default class Esui extends Component {
         }
     }
 
+    /**
+     * 挂载到DOM树种的时候才创建ESUI控件
+     *
+     * @override
+     */
     initMounted() {
         if (!this.isHide) {
             this.createControl();
         }
     }
 
+    /**
+     * 把props属性透传到ESUI控件，同时处理一下事件绑定
+     *
+     * @override
+     */
     propsChange(changedProps) {
         if (this.control) {
             this.control.setProperties(changedProps);
@@ -50,6 +93,11 @@ export default class Esui extends Component {
         }
     }
 
+    /**
+     * 创建ESUI控件
+     *
+     * @private
+     */
     createControl() {
         // 抽出扩展
         const extensions = [];
@@ -76,6 +124,11 @@ export default class Esui extends Component {
         this.bindEvent(this.props);
     }
 
+    /**
+     * 销毁ESUI控件
+     *
+     * @private
+     */
     destroyControl() {
         this.control && this.control.dispose();
         this.control = null;
@@ -86,6 +139,12 @@ export default class Esui extends Component {
         this.refs.main && this.refs.main.setInnerHTML('');
     }
 
+    /**
+     * 绑定事件
+     *
+     * @private
+     * @param  {Object} props 当前props
+     */
     bindEvent(props) {
         each(props, (value, name) => {
             if (typeof value === 'function' && name.indexOf('on') === 0) {
@@ -147,10 +206,24 @@ export default class Esui extends Component {
         this.childrenTree.initRender();
     }
 
-    getControl() {
-        return this.control;
+    /**
+     * 调用ESUI控件上面的方法
+     *
+     * @public
+     * @param  {string}    methodName 方法名
+     * @param  {...*} args       传递给方法的参数
+     * @return {*}
+     */
+    invoke(methodName, ...args) {
+        let control = this.control;
+        if (control) {
+            return control[methodName](...args);
+        }
     }
 
+    /**
+     * @override
+     */
     destroy() {
         this.destroyControl();
         this.eventCache = null;
